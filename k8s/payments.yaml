@@ -12,10 +12,12 @@ spec:
       labels:
         app: payments
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: payments
-          image: quickticket-payments:v1
-          imagePullPolicy: Never
+          image: ghcr.io/minimaxc/quickticket-payments:117336566e7a6d1f9bb7613eee1695e3b345fe9a
+          imagePullPolicy: Always
           env:
             - name: PAYMENT_FAILURE_RATE
               value: "0.0"

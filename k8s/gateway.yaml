@@ -18,7 +18,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: gateway
-          image: ghcr.io/minimaxc/quickticket-gateway:117336566e7a6d1f9bb7613eee1695e3b345fe9a
+          image: ghcr.io/minimaxc/quickticket-gateway:does-not-exist
           imagePullPolicy: Always
           env:
             - name: EVENTS_URL

@@ -145,6 +145,21 @@ Schema verification:
 
 `diff /tmp/5xx.before /tmp/5xx.after` produced no output, so the migration added no observed 5xx responses.
 
+### Why CREATE INDEX CONCURRENTLY matters
+
+`CREATE INDEX CONCURRENTLY` allows PostgreSQL to build the index without
+blocking normal reads and writes for the duration of the index build.
+
+Without `CONCURRENTLY`, creating an index on a large production table can take
+a lock that blocks writes while the index is being built. On a table with
+around 10 million rows, index construction could take minutes, so application
+requests that need the table could queue, time out, or fail.
+
+Using `CONCURRENTLY` takes longer internally and requires running outside
+Alembic's normal transaction block, but it keeps the table available to live
+traffic. That is why the migration uses `autocommit_block()` together with
+`postgresql_concurrently=True`.
+
 ### Expand-and-contract design
 
 The safe sequence is:

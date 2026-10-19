@@ -3,7 +3,12 @@ kind: Deployment
 metadata:
   name: events
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: events
@@ -12,12 +17,13 @@ spec:
       labels:
         app: events
     spec:
+      terminationGracePeriodSeconds: 20
       imagePullSecrets:
         - name: ghcr-secret
       containers:
         - name: events
-          image: ghcr.io/minimaxc/quickticket-events:117336566e7a6d1f9bb7613eee1695e3b345fe9a
-          imagePullPolicy: Always
+          image: quickticket-events:deploy-b
+          imagePullPolicy: Never
           env:
             - name: DB_HOST
               value: "postgres"
@@ -42,12 +48,16 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
           readinessProbe:
             httpGet:
               path: /health
               port: 8081
-            periodSeconds: 5
-            failureThreshold: 2
+            periodSeconds: 2
+            failureThreshold: 1
           resources:
             requests:
               cpu: 50m
